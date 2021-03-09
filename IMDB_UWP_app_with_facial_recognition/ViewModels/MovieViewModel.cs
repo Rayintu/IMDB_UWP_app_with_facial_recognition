@@ -25,7 +25,7 @@ namespace IMDB_UWP_app_with_facial_recognition.ViewModels
             set { SetProperty(ref _example, value); }
         }
 
-        private string _imdbUrl = "https://www.imdb.com/title/tt0120737/";
+        private string _imdbUrl;
 
         public string ImdbUrl
         {
@@ -70,6 +70,7 @@ namespace IMDB_UWP_app_with_facial_recognition.ViewModels
             navigationService = _navigationService;
             movie = new Movie();
             CreateGetMovieCommand();
+            CreateWrongMovieCommand();
         }
 
         public ICommand GetMovieCommand
@@ -99,7 +100,7 @@ namespace IMDB_UWP_app_with_facial_recognition.ViewModels
                 MovieTitle = movieDto.MovieTitle;
                 MoviePoster = movieDto.MoviePoster;
 
-//                RequestProgress = "";
+                RequestProgress = "";
 
                 RemoveCommands();
 
@@ -110,6 +111,28 @@ namespace IMDB_UWP_app_with_facial_recognition.ViewModels
             {
                 RequestProgress = e.InnerException.Message;
             }
+        }
+
+        public ICommand WrongMovieCommand
+        {
+            get;
+            internal set;
+        }
+
+        private bool CanExecuteWrongMovieCommand()
+        {
+            return true;
+        }
+
+        private void CreateWrongMovieCommand()
+        {
+            WrongMovieCommand = new RelayCommand(WrongMovieExecute, CanExecuteWrongMovieCommand);
+        }
+
+        public void WrongMovieExecute()
+        {
+            RemoveCommands();
+            navigationService.GoBack();
         }
     }
 }
