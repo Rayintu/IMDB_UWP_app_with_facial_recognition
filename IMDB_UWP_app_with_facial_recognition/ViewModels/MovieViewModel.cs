@@ -5,13 +5,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Windows.UI.Xaml.Controls;
 using IMDB_UWP_app_with_facial_recognition.Models;
+using IMDB_UWP_app_with_facial_recognition.Services;
+using IMDB_UWP_app_with_facial_recognition.Views;
 
 namespace IMDB_UWP_app_with_facial_recognition.ViewModels
 {
     class MovieViewModel : ViewModelBase
     {
         private Movie movie;
+        private INavigationService navigationService;
 
         private string _example;
 
@@ -29,16 +33,41 @@ namespace IMDB_UWP_app_with_facial_recognition.ViewModels
             set { SetProperty(ref _imdbUrl, value); }
         }
 
-        private string _isSomethingReturned = "no";
+        private static string _movieId;
 
-        public string IsSomethingReturned
+        public string MovieId
         {
-            get { return _isSomethingReturned; }
-            set { SetProperty(ref _isSomethingReturned, value); }
+            get { return _movieId; }
+            set { SetProperty(ref _movieId, value); }
         }
 
-        public MovieViewModel()
+        private static string _movieTitle;
+
+        public string MovieTitle
         {
+            get { return _movieTitle; }
+            set { SetProperty(ref _movieTitle, value); }
+        }
+
+        private static string _moviePoster;
+
+        public string MoviePoster
+        {
+            get { return _moviePoster; }
+            set { SetProperty(ref _moviePoster, value); }
+        }
+
+        private string _requestProgress = "";
+
+        public string RequestProgress
+        {
+            get { return _requestProgress; }
+            set { SetProperty(ref _requestProgress, value); }
+        }
+
+        public MovieViewModel(INavigationService _navigationService)
+        {
+            navigationService = _navigationService;
             movie = new Movie();
             CreateGetMovieCommand();
         }
@@ -61,22 +90,26 @@ namespace IMDB_UWP_app_with_facial_recognition.ViewModels
 
         public async void GetMovieExecute()
         {
+            RequestProgress = "trying to find the movie...";
             try
             {
                 var movieDto = await movie.getMovie(movie.getMovieIdFromUrl(ImdbUrl));
-//                if (movieDto.MovieId != null)
-//                {
-//                    IsSomethingReturned = $"YESSS {movieDto.MovieId}";
-//                }
 
-                IsSomethingReturned = "uhhhhh";
+                MovieId = movieDto.MovieId;
+                MovieTitle = movieDto.MovieTitle;
+                MoviePoster = movieDto.MoviePoster;
+
+//                RequestProgress = "";
+
+                RemoveCommands();
+
+                navigationService.Navigate(typeof(CheckMoviePage));
+
             }
             catch (Exception e)
             {
-                IsSomethingReturned = "error";
+                RequestProgress = e.InnerException.Message;
             }
-
-            
         }
     }
 }

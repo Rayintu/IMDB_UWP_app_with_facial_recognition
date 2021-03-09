@@ -16,13 +16,13 @@ namespace IMDB_UWP_app_with_facial_recognition.Models
         {
         }
 
-        public async Task<MovieDTO>  getMovie(string movieId)
+        public async Task<MovieDTO> getMovie(string movieId)
         {
             using (HttpClient httpClient = new HttpClient())
             {
                 try
                 {
-                    HttpResponseMessage response = await httpClient.GetAsync($"https://localhost:5001/api/Movies?movieId={movieId}");
+                    HttpResponseMessage response = await httpClient.GetAsync($"http://localhost:50276/api/Movies?movieId={movieId}");
                     response.EnsureSuccessStatusCode();
                     string responseContent = await response.Content.ReadAsStringAsync();
                     MovieDTO movie = JsonConvert.DeserializeObject<MovieDTO>(responseContent);
@@ -31,7 +31,8 @@ namespace IMDB_UWP_app_with_facial_recognition.Models
                 }
                 catch (HttpRequestException e)
                 {
-
+                    Console.WriteLine(e.Message);
+                    throw e;
                 }
             }
 
