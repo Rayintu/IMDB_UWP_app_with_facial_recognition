@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using HtmlAgilityPack;
 using IMDB_API.Models;
 using IMDB_API.Validators;
+using IMDB_UWP_app_with_facial_recognition.JSON;
+using Newtonsoft.Json;
 
 namespace IMDB_API.Controllers
 {
@@ -31,26 +33,57 @@ namespace IMDB_API.Controllers
             return Ok(movieDto);
         }
 
+        [HttpGet]
+        [Route("{action=Details}/{movieId?}")]
+        public ActionResult Details(string movieId)
+        {
+            var url = $"https://www.imdb.com/title/{movieId}";
+            var web = new HtmlWeb();
+            var doc = web.Load(url);
+
+            MovieDetailsDTO movieDetailsDto = createMovieDetailsDto(movieId, doc);
+
+            return Ok(movieDetailsDto);
+        }
+
         private MovieDTO createMovieDto(string movieId, HtmlDocument doc)
         {
-            var metaTags = doc.DocumentNode.SelectNodes("//meta");
+            MovieInfo movieInfo = getMovieInfo(doc);
 
             return new MovieDTO()
             {
                 MovieId = movieId,
-                MoviePoster = getMetaProperty(metaTags, "og:image"),
-                MovieTitle = getMetaProperty(metaTags, "og:title"),
+                MoviePoster = movieInfo.image,
+                MovieTitle = movieInfo.name,
             };
         }
 
-        //Wanted to do this with link and not have to write a whole method for it but it seems like linq wont work on a HtmlNodeCollection
-        private string getMetaProperty(HtmlNodeCollection metaTags, string selector)
+        private MovieDetailsDTO createMovieDetailsDto(string movieId, HtmlDocument doc)
         {
-            foreach (var node in metaTags)
+            MovieInfo movieInfo = getMovieInfo(doc);
+
+            return new MovieDetailsDTO()
             {
-                if (node.GetAttributeValue("property", "property not found") == selector)
+                MovieId = movieId,
+                MoviePoster = movieInfo.image,
+                MovieTitle = movieInfo.name,
+                Source = "Website",
+                MovieSynopsis = movieInfo.description,
+                MovieRating = movieInfo.aggregateRating.ratingValue,
+            };
+        }
+
+        private MovieInfo getMovieInfo(HtmlDocument doc)
+        {
+            var scriptTags = doc.DocumentNode.SelectNodes("//script");
+
+            MovieInfo movieInfo = null;
+
+            foreach (var node in scriptTags)
+            {
+                if (node.GetAttributeValue("type", "no type found") == "application/ld+json")
                 {
-                    return node.GetAttributeValue("content", "content not found");
+                    return JsonConvert.DeserializeObject<MovieInfo>(node.FirstChild.InnerText);
                 }
             }
 
