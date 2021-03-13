@@ -24,9 +24,7 @@ namespace IMDB_API.Controllers
                 return BadRequest("Please enter a valid movieId");
             }
 
-            var url = $"https://www.imdb.com/title/{movieId}";
-            var web = new HtmlWeb();
-            var doc = web.Load(url);
+            var doc = getWebsiteHtmlDocument(movieId);
 
             MovieDTO movieDto = createMovieDto(movieId, doc);
 
@@ -37,9 +35,7 @@ namespace IMDB_API.Controllers
         [Route("{action=Details}/{movieId?}")]
         public ActionResult Details(string movieId)
         {
-            var url = $"https://www.imdb.com/title/{movieId}";
-            var web = new HtmlWeb();
-            var doc = web.Load(url);
+            var doc = getWebsiteHtmlDocument(movieId);
 
             MovieDetailsDTO movieDetailsDto = createMovieDetailsDto(movieId, doc);
 
@@ -70,7 +66,15 @@ namespace IMDB_API.Controllers
                 Source = "Website",
                 MovieSynopsis = movieInfo.description,
                 MovieRating = movieInfo.aggregateRating.ratingValue,
+                DatePublished = movieInfo.datePublished,
             };
+        }
+
+        private HtmlDocument getWebsiteHtmlDocument(string movieId)
+        {
+            var url = $"https://www.imdb.com/title/{movieId}";
+            var web = new HtmlWeb();
+            return web.Load(url);
         }
 
         private MovieInfo getMovieInfo(HtmlDocument doc)

@@ -20,5 +20,6 @@ namespace IMDB_API.Models
         public string MoviePoster { get; set; } // Link to image of movieposter
         public string MovieSynopsis { get; set; } // Synopsis of the movie
         public string MovieRating { get; set; } // Rating of the movie double range: 0 - 10
+        public string DatePublished { get; set; } // Release date of the movie yyyy-mm-dd
     }
 }

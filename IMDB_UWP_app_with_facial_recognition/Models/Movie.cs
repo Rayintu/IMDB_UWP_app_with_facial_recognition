@@ -39,6 +39,27 @@ namespace IMDB_UWP_app_with_facial_recognition.Models
             return null;
         }
 
+        public async Task<MovieDetailsDTO> getMovieDetails(string movieId)
+        {
+            using (HttpClient httpClient = new HttpClient())
+            {
+                try
+                {
+                    HttpResponseMessage response = await httpClient.GetAsync($"http://localhost:50276/api/Movies/Details/{movieId}");
+                    response.EnsureSuccessStatusCode();
+                    string responseContent = await response.Content.ReadAsStringAsync();
+                    MovieDetailsDTO movieDetails = JsonConvert.DeserializeObject<MovieDetailsDTO>(responseContent);
+
+                    return movieDetails;
+                }
+                catch (HttpRequestException e)
+                {
+                    Console.WriteLine(e.Message);
+                    throw e;
+                }
+            }
+        }
+
         public string getMovieIdFromUrl(string ImdbUrl)
         {
             var match = Regex.Match(ImdbUrl, "(?<=https:\\/\\/www\\.imdb\\.com\\/title\\/)\\w*");

@@ -120,10 +120,14 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="DTOs\MovieDTO.cs" />
+    <Compile Include="Formatters\RatingFormatter.cs" />
+    <Compile Include="Formatters\SourceFormatter.cs" />
+    <Compile Include="Formatters\VisibleOnRequestProgress.cs" />
     <Compile Include="Models\Movie.cs" />
     <Compile Include="RelayCommand.cs" />
     <Compile Include="Services\INavigationService.cs" />
     <Compile Include="Services\NavigationService.cs" />
+    <Compile Include="Services\ParserService.cs" />
     <Compile Include="SimpleCommandManager.cs" />
     <Compile Include="ViewModels\MovieViewModel.cs" />
     <Compile Include="ViewModels\ViewModelBase.cs" />
