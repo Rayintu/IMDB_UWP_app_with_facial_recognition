@@ -11,6 +11,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using IMDB_API.Context;
+using IMDB_API.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace IMDB_API
 {
@@ -26,6 +29,10 @@ namespace IMDB_API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<MovieContext>(options =>
+                options.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=MovieDB;Trusted_Connection=True;"));
+
+            services.AddScoped<EFCoreMovieRepository>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>

@@ -5,7 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
+using IMDB_API.Context;
 using IMDB_API.Models;
+using IMDB_API.Repositories;
 using IMDB_API.Validators;
 using IMDB_UWP_app_with_facial_recognition.JSON;
 using Newtonsoft.Json;
@@ -14,8 +16,15 @@ namespace IMDB_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class MoviesController : ControllerBase
+    public class MoviesController : EFController<Movie, EFCoreMovieRepository>
     {
+        private EFCoreMovieRepository _repository;
+
+        public MoviesController(EFCoreMovieRepository repository) : base(repository)
+        {
+            _repository = repository;
+        }
+
         [HttpGet]
         public ActionResult getMovie(string movieId)
         {
@@ -27,6 +36,7 @@ namespace IMDB_API.Controllers
             var doc = getWebsiteHtmlDocument(movieId);
 
             MovieDTO movieDto = createMovieDto(movieId, doc);
+
 
             return Ok(movieDto);
         }
