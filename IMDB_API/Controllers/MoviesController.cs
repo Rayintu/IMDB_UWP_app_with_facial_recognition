@@ -10,6 +10,7 @@ using IMDB_API.Models;
 using IMDB_API.Repositories;
 using IMDB_API.Validators;
 using IMDB_UWP_app_with_facial_recognition.JSON;
+using Mapster;
 using Newtonsoft.Json;
 
 namespace IMDB_API.Controllers
@@ -35,24 +36,38 @@ namespace IMDB_API.Controllers
 
             var doc = getWebsiteHtmlDocument(movieId);
 
-            MovieDTO movieDto = createMovieDto(movieId, doc);
-
+            MovieDTO movieDto = CreateMovieDto(movieId, doc);
 
             return Ok(movieDto);
         }
 
         [HttpGet]
         [Route("{action=Details}/{movieId?}")]
-        public ActionResult Details(string movieId)
+        public async Task<ActionResult> Details(string movieId)
         {
-            var doc = getWebsiteHtmlDocument(movieId);
+            MovieDetailsDTO movieDetailsDto = null;
 
-            MovieDetailsDTO movieDetailsDto = createMovieDetailsDto(movieId, doc);
+            if (!_repository.IsMovieInDB(movieId).Result)
+            {
+                var doc = getWebsiteHtmlDocument(movieId);
+
+                movieDetailsDto = createMovieDetailsDto(movieId, doc);
+
+                Movie movie = movieDetailsDto.Adapt<Movie>();
+                movie.Source = "Database";
+
+                await _repository.AddMovie(movie);
+            }
+            else
+            {
+                Movie movie = await _repository.GetMovie(movieId);
+                movieDetailsDto = movie.Adapt<MovieDetailsDTO>();
+            }
 
             return Ok(movieDetailsDto);
         }
 
-        private MovieDTO createMovieDto(string movieId, HtmlDocument doc)
+        private MovieDTO CreateMovieDto(string movieId, HtmlDocument doc)
         {
             MovieInfo movieInfo = getMovieInfo(doc);
 
