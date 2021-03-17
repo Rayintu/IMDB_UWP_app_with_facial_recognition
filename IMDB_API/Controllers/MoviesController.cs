@@ -29,14 +29,25 @@ namespace IMDB_API.Controllers
         [HttpGet]
         public ActionResult getMovie(string movieId)
         {
+            MovieDTO movieDto;
+
             if (!MovieValidator.ValidateMovieId(movieId))
             {
                 return BadRequest("Please enter a valid movieId");
             }
 
-            var doc = getWebsiteHtmlDocument(movieId);
+            Movie movie = GetMovieFromDB(movieId).Result;
 
-            MovieDTO movieDto = CreateMovieDto(movieId, doc);
+            if (movie != null)
+            {
+                movieDto = movie.Adapt<MovieDTO>();
+            }
+            else
+            {
+                var doc = getWebsiteHtmlDocument(movieId);
+
+                movieDto = CreateMovieDto(movieId, doc);
+            }
 
             return Ok(movieDto);
         }
@@ -46,21 +57,21 @@ namespace IMDB_API.Controllers
         public async Task<ActionResult> Details(string movieId)
         {
             MovieDetailsDTO movieDetailsDto = null;
+            Movie movie = GetMovieFromDB(movieId).Result;
 
-            if (!_repository.IsMovieInDB(movieId).Result)
+            if (movie == null)
             {
                 var doc = getWebsiteHtmlDocument(movieId);
 
-                movieDetailsDto = createMovieDetailsDto(movieId, doc);
+                movieDetailsDto = CreateMovieDetailsDto(movieId, doc);
 
-                Movie movie = movieDetailsDto.Adapt<Movie>();
+                movie = movieDetailsDto.Adapt<Movie>();
                 movie.Source = "Database";
 
                 await _repository.AddMovie(movie);
             }
             else
             {
-                Movie movie = await _repository.GetMovie(movieId);
                 movieDetailsDto = movie.Adapt<MovieDetailsDTO>();
             }
 
@@ -79,7 +90,7 @@ namespace IMDB_API.Controllers
             };
         }
 
-        private MovieDetailsDTO createMovieDetailsDto(string movieId, HtmlDocument doc)
+        private MovieDetailsDTO CreateMovieDetailsDto(string movieId, HtmlDocument doc)
         {
             MovieInfo movieInfo = getMovieInfo(doc);
 
@@ -117,6 +128,11 @@ namespace IMDB_API.Controllers
             }
 
             return null;
+        }
+
+        private async Task<Movie> GetMovieFromDB(string movieId)
+        {
+            return await _repository.GetMovie(movieId);
         }
     }
 }
