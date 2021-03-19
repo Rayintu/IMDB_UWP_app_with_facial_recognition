@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
+using IMDB_API.Cache;
 using IMDB_API.Context;
 using IMDB_API.Models;
 using IMDB_API.Repositories;
@@ -21,6 +23,8 @@ namespace IMDB_API.Controllers
     {
         private EFCoreMovieRepository _repository;
 
+        
+
         public MoviesController(EFCoreMovieRepository repository) : base(repository)
         {
             _repository = repository;
@@ -36,7 +40,7 @@ namespace IMDB_API.Controllers
                 return BadRequest("Please enter a valid movieId");
             }
 
-            Movie movie = GetMovieFromDB(movieId).Result;
+            Movie movie = GetMovieFromCache(movieId);
 
             if (movie != null)
             {
@@ -57,7 +61,7 @@ namespace IMDB_API.Controllers
         public async Task<ActionResult> Details(string movieId)
         {
             MovieDetailsDTO movieDetailsDto = null;
-            Movie movie = GetMovieFromDB(movieId).Result;
+            Movie movie = GetMovieFromCache(movieId);
 
             if (movie == null)
             {
@@ -66,12 +70,16 @@ namespace IMDB_API.Controllers
                 movieDetailsDto = CreateMovieDetailsDto(movieId, doc);
 
                 movie = movieDetailsDto.Adapt<Movie>();
-                movie.Source = "Database";
-
-                await _repository.AddMovie(movie);
+                
+                await AddToBothCache(movie);
             }
             else
             {
+                if (movie.Source == "Database")
+                {
+                    AddToConcurrentCache(movie);
+                }
+
                 movieDetailsDto = movie.Adapt<MovieDetailsDTO>();
             }
 
@@ -130,9 +138,53 @@ namespace IMDB_API.Controllers
             return null;
         }
 
+        private async Task AddToBothCache(Movie movie)
+        {
+            AddToConcurrentCache(movie);
+            await AddToDbCache(movie);
+        }
+
+        private void AddToConcurrentCache(Movie movie)
+        {
+            AddMovieToConcurrentCache(movie);
+        }
+
+        private async Task AddToDbCache(Movie movie)
+        {
+            movie.Source = "Database";
+            await _repository.AddMovie(movie);
+        }
+
+        private Movie GetMovieFromCache(string movieId)
+        {
+            Movie cacheMovie = GetMovieFromConcurrentCache(movieId);
+
+            if (cacheMovie != null) return cacheMovie;
+
+            Movie dbMovie = GetMovieFromDB(movieId).Result;
+
+            if (dbMovie != null) return dbMovie;
+
+            return null;
+        }
+
         private async Task<Movie> GetMovieFromDB(string movieId)
         {
             return await _repository.GetMovie(movieId);
+        }
+
+        private void AddMovieToConcurrentCache(Movie _movie)
+        {
+            Movie movie = new Movie();
+            movie = _movie.Adapt<Movie>();
+            movie.Source = "Concurrent cache";
+
+            ConcurrentCacheSingleton.Instance.AddMovie(movie);
+        }
+
+        private Movie GetMovieFromConcurrentCache(string movieId)
+        {
+            return ConcurrentCacheSingleton.Instance.GetMovie(movieId);
         }
     }
 }
