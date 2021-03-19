@@ -129,6 +129,7 @@
     <Compile Include="Services\NavigationService.cs" />
     <Compile Include="Services\ParserService.cs" />
     <Compile Include="SimpleCommandManager.cs" />
+    <Compile Include="Validators\IMDBValidator.cs" />
     <Compile Include="ViewModels\MovieViewModel.cs" />
     <Compile Include="ViewModels\ViewModelBase.cs" />
     <Compile Include="Views\CheckMoviePage.xaml.cs">
@@ -185,6 +186,11 @@
     <PackageReference Include="Newtonsoft.Json">
       <Version>12.0.3</Version>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="SharedClassLibrary">
+      <HintPath>..\SharedClassLibrary\obj\Debug\netcoreapp3.1\SharedClassLibrary.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup />
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">

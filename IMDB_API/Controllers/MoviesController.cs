@@ -23,8 +23,6 @@ namespace IMDB_API.Controllers
     {
         private EFCoreMovieRepository _repository;
 
-        
-
         public MoviesController(EFCoreMovieRepository repository) : base(repository)
         {
             _repository = repository;
@@ -50,7 +48,14 @@ namespace IMDB_API.Controllers
             {
                 var doc = getWebsiteHtmlDocument(movieId);
 
-                movieDto = CreateMovieDto(movieId, doc);
+                try
+                {
+                    movieDto = CreateMovieDto(movieId, doc);
+                }
+                catch (Exception e)
+                {
+                    return NotFound(e.Message);
+                }
             }
 
             return Ok(movieDto);
@@ -62,6 +67,11 @@ namespace IMDB_API.Controllers
         {
             MovieDetailsDTO movieDetailsDto = null;
             Movie movie = GetMovieFromCache(movieId);
+
+            if (!MovieValidator.ValidateMovieId(movieId))
+            {
+                return BadRequest("Please enter a valid movieId");
+            }
 
             if (movie == null)
             {
@@ -88,7 +98,16 @@ namespace IMDB_API.Controllers
 
         private MovieDTO CreateMovieDto(string movieId, HtmlDocument doc)
         {
-            MovieInfo movieInfo = getMovieInfo(doc);
+            MovieInfo movieInfo;
+
+            try
+            {
+                movieInfo = getMovieInfo(doc);
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
 
             return new MovieDTO()
             {
@@ -124,6 +143,11 @@ namespace IMDB_API.Controllers
         private MovieInfo getMovieInfo(HtmlDocument doc)
         {
             var scriptTags = doc.DocumentNode.SelectNodes("//script");
+
+            if (scriptTags == null)
+            {
+                throw new Exception("No movie was found at that url!");
+            }
 
             MovieInfo movieInfo = null;
 

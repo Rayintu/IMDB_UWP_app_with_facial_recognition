@@ -33,6 +33,7 @@ namespace IMDB_UWP_app_with_facial_recognition.Models
                 {
                     Console.WriteLine(e.Message);
                     throw e;
+
                 }
             }
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ using Windows.UI.Xaml.Controls;
 using IMDB_UWP_app_with_facial_recognition.DTOs;
 using IMDB_UWP_app_with_facial_recognition.Models;
 using IMDB_UWP_app_with_facial_recognition.Services;
+using IMDB_UWP_app_with_facial_recognition.Validators;
 using IMDB_UWP_app_with_facial_recognition.Views;
 
 namespace IMDB_UWP_app_with_facial_recognition.ViewModels
@@ -131,22 +133,30 @@ namespace IMDB_UWP_app_with_facial_recognition.ViewModels
             RequestProgress = "trying to find the movie...";
             try
             {
-                var movieDto = await movie.getMovie(movie.getMovieIdFromUrl(ImdbUrl));
+                if (IMDBValidator.ValidateImdbUrl(ImdbUrl))
+                {
+                    var movieDto = await movie.getMovie(movie.getMovieIdFromUrl(ImdbUrl));
 
-                MovieId = movieDto.MovieId;
-                MovieTitle = movieDto.MovieTitle;
-                MoviePoster = movieDto.MoviePoster;
+                    MovieId = movieDto.MovieId;
+                    MovieTitle = movieDto.MovieTitle;
+                    MoviePoster = movieDto.MoviePoster;
 
-                RequestProgress = "";
+                    RequestProgress = "";
 
-                RemoveCommands();
+                    RemoveCommands();
 
-                navigationService.Navigate(typeof(CheckMoviePage));
+                    navigationService.Navigate(typeof(CheckMoviePage));
+                }
+                else
+                {
+                    RequestProgress =
+                        "Please enter a valid imdb url! It should look something like this: https://www.imdb.com/title/ttxxxxxxx/";
+                }
 
             }
-            catch (Exception e)
+            catch (HttpRequestException e)
             {
-                RequestProgress = e.InnerException.Message;
+                RequestProgress = e.Message;
             }
         }
 
