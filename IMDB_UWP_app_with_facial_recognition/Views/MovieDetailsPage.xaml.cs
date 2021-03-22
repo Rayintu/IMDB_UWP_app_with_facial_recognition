@@ -12,18 +12,24 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using IMDB_UWP_app_with_facial_recognition.Services;
+using IMDB_UWP_app_with_facial_recognition.ViewModels;
 
-// The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
+// The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
-namespace IMDB_UWP_app_with_facial_recognition
+namespace IMDB_UWP_app_with_facial_recognition.Views
 {
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class MainPage : Page
+    public sealed partial class MovieDetailsPage : Page
     {
-        public MainPage()
+        public MovieDetailsPage()
         {
+            var viewModel = new MovieViewModel(new NavigationService());
+
+            DataContext = viewModel;
+
             this.InitializeComponent();
         }
     }

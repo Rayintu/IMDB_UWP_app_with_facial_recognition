@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.30907.101
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IMDB_UWP_app_with_facial_recognition", "IMDB_UWP_app_with_facial_recognition\IMDB_UWP_app_with_facial_recognition.csproj", "{6DD5A746-B534-499B-86E4-D217EE5E2886}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IMDB_API", "IMDB_API\IMDB_API.csproj", "{11478714-FC15-44CE-A0E3-D74D8E684DF0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IMDB_API", "IMDB_API\IMDB_API.csproj", "{11478714-FC15-44CE-A0E3-D74D8E684DF0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
